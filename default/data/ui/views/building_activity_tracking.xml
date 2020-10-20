@@ -1,0 +1,62 @@
+<form theme="dark">
+  <label>Building Activity Tracking</label>
+  <fieldset submitButton="false"></fieldset>
+    <row >
+  <html depends="$magictoken$">
+<style>
+  .dashboard-body {
+  background-image: url('/static/app/minecraft-behaviour-app/images/bg.jpg') !important;
+  background-blend-mode: hard-light;
+  background-repeat: repeat;
+  background-size: 42% ;
+  }
+  
+
+</style>  
+</html>
+</row>
+  <row>
+    <panel>
+      <input type="dropdown" token="player">
+        <label>Player</label>
+        <fieldForLabel>event.player</fieldForLabel>
+        <fieldForValue>event.player</fieldForValue>
+        <search>
+          <query>index=minecraft sourcetype=minecraft:events event.player=* | dedup event.player | fields event.player</query>
+          <earliest>-90d@d</earliest>
+          <latest>now</latest>
+        </search>
+      </input>
+      <html>
+  <h2>
+    Tracking of Player building sessions.
+  </h2>
+  <p>
+    Use this dashboard to discover where and when a player has been building.
+  </p>
+</html>
+    </panel>
+  </row>
+  <row>
+    <panel depends="$player$">
+      <title>$player$ has been building...</title>
+      <table>
+        <search>
+          <query>index=minecraft event.action=placed event.type=block event.player=$player$ 
+| rename event.location.* AS *
+| eval x=round(x,3),z=round(z,3)
+| chart values(x) AS x values(y) AS y values(z) AS z over _time
+| eval x_count=mvcount(x),z_count=mvcount(z)
+| where (x_count&gt;1 OR z_count&gt;1)
+| fields - x_count z_count
+| sort - _time
+| rename x AS "X Coordinate" y AS "Y Coordinate" z AS "Z Coordinate"</query>
+          <earliest>-90d@d</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+</form>

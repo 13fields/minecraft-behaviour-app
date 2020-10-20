@@ -1,0 +1,26 @@
+<nav search_view="search">
+  <view name="home" default="true" />
+  <view name="world_map" default="true" />
+  <collection label="Players" >
+  	<view name="player_stats" />
+  	<view name="player_tracking" />
+  </collection>
+  <view name="kill_tracking" />
+  <collection label="Mobs &amp; Robbers" >
+    <view name="mob_activity_tracking" />
+  </collection>
+  <collection label="Building Blocks">
+  	<view name="object_tracking" />
+  	<view name="building_activity_tracking" />
+  </collection>
+  <collection label="Games &amp; Scenarios">
+    <view name="minecraft_hide_seek" />
+  </collection>
+  <collection label="Splunk Defaults" >
+    <view name="search" />
+    <view name="datasets" />
+    <view name="reports" />
+    <view name="alerts" />
+    <view name="dashboards" />
+  </collection >
+</nav>

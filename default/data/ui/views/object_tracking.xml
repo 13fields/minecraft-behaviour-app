@@ -1,0 +1,193 @@
+<form theme="dark">
+  <label>Object Tracking</label>
+  <fieldset submitButton="false"></fieldset>
+    <row >
+  <html depends="$magictoken$">
+<style>
+  .dashboard-body {
+  background-image: url('/static/app/minecraft-behaviour-app/images/bg.jpg') !important;
+  background-blend-mode: hard-light;
+  background-repeat: repeat;
+  background-size: 42% ;
+  }
+  
+
+</style>  
+</html>
+</row>
+  <row>
+    <panel>
+      <html>
+  <h2>Object Tracking Dashboard</h2>
+  <p>You can use this dashboard to find out information about a number of things related to objects in the game. You can view the data by user or by object type. Answering questions like:</p> <p style="padding-left: 10px;">
+    <p>   </p><li>"What is someone picking up or putting down?"</li>
+    <li>"Where are those objects being picked up or put down?"</li>
+    </p>
+</html>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Object Activity by Individual Player</title>
+      <input type="dropdown" token="player" searchWhenChanged="true">
+        <label>Player</label>
+        <fieldForLabel>event.player</fieldForLabel>
+        <fieldForValue>event.player</fieldForValue>
+        <search>
+          <query>index=minecraft sourcetype=minecraft:events event.player=* | dedup event.player | fields event.player</query>
+          <earliest>-90d@d</earliest>
+          <latest>now</latest>
+        </search>
+      </input>
+      <html>
+  <h2>Object activity by individual player</h2>
+  <p>Select a player from the dropdown to start looking at what they've been up to dropping and picking things up...</p>
+</html>
+    </panel>
+    <panel>
+      <title>Object Activity by Resource Type</title>
+      <input type="dropdown" token="object" searchWhenChanged="true">
+        <label>Object Type</label>
+        <fieldForLabel>type</fieldForLabel>
+        <fieldForValue>type</fieldForValue>
+        <search>
+          <query>index=minecraft event.item_type=*
+| fields event.item_type
+| rename event.item_type AS type
+| rex mode=sed field=type "s/_/ /g"
+| rex mode=sed field=type "s/LEGACY //g"
+| dedup type</query>
+          <earliest>-90d@d</earliest>
+          <latest>now</latest>
+        </search>
+      </input>
+      <html>
+  <h2>Object Activity by Resource Type</h2>
+  <p>Select a resource type from the drop down to find the best places to locate that resource on the map...</p>
+</html>
+    </panel>
+  </row>
+  <row>
+    <panel depends="$player$">
+      <title>Things that $player$ has picked up</title>
+      <chart>
+        <search>
+          <query>index=minecraft "event.player"=$player$ "event.action"="picked up" earliest=1600538400 latest=1600646400
+| rex field=event.item_detail "LEGACY_(?&lt;object&gt;[A-Z_]+)"
+| rex mode=sed field=object "s/_/ /g"
+| timechart useother=false count by object</query>
+          <earliest>-30d@d</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+    <panel depends="$player$">
+      <title>Things that $player$ has put down...</title>
+      <chart>
+        <search>
+          <query>index=minecraft "event.player"=$player$ "event.action" IN (placed dropped) earliest=1600538400 latest=1600646400
+| rex field=event.item_type "LEGACY_(?&lt;object&gt;[A-Z_]+)"
+| timechart usenull=false useother=false  count by object</query>
+          <earliest>-30d@d</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel depends="$object$">
+      <title>Trying to find things? This will help!</title>
+      <table>
+        <search>
+          <query>index=minecraft event.item_type=* event.item_quantity=*
+| fields event.item_quantity event.item_type event.location.x event.location.y
+| rename event.location.* AS * event.item_* AS * event.action AS action
+| rex mode=sed field=type "s/_/ /g"
+| rex mode=sed field=type "s/LEGACY //g"
+| eval x=round(x,0),y=round(y,0)
+| stats sum(quantity) AS quantity by x y type
+| where type="$object$"
+| sort - quantity
+| rename x AS "X Coordinate" y AS "Y Coordinate" type AS "Type of item" quantity AS "Quantity of items"
+| head 5</query>
+          <earliest>-90d@d</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>

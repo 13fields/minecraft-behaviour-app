@@ -1,0 +1,78 @@
+<dashboard theme="dark">
+  <row >
+  <html depends="$magictoken$">
+<style>
+  .dashboard-body {
+  background-image: url('/static/app/minecraft-behaviour-app/images/bg.jpg') !important;
+  background-blend-mode: hard-light;
+  background-repeat: repeat;
+  background-size: 42% ;
+  }
+  
+
+</style>  
+</html>
+</row>
+  <label>Home</label>
+    <row>
+      <html><div><img src="/static/app/minecraft-behaviour-app/images/stone.png" style="width:42px;height:42px;float:left;margin: 10px;" /> </div><h1> Introduction to the Splunk Minecraft App</h1>
+      <p>This App provides insight into the data being fed from the Splunk- Minecraft integration app. Through this application we can analyse and build a picture of the User behaviour within our Minecraft world</p>
+      
+     
+</html>
+  </row>
+  <row>
+    <panel>
+      
+      <html>
+        <h2>Player Dashboards</h2>
+          <img src="/static/app/minecraft-behaviour-app/images/steve.png" style="width:80px;height:200px;float:left;margin: 15px;"/>
+        <p style="margin-top:40px;margin-bottom:40px;">A collection of Player related dashboards to assist in giving insight to the Player behaviour in the Minecraft World. From these dashboards we can understand and interrogate data on where users are going, what they are doing, what items they pickup or drop and what blocks they choose to mine or place. Additionally, we can detection connection / disconnection events, spawn locations, teleporting and command usage all within these dashboards.</p> 
+	<a class="btn btn-primary pull-right" style="margin:20px;" href="/app/minecraft-behaviour-app/player_stats">Player Stats</a>        <a class="btn btn-primary pull-right" style="margin:20px;" href="/app/minecraft-behaviour-app/player_tracking">Location Tracking</a>        <a class="btn default pull-right" style="margin:20px;">Block Collection Analysis (WIP)</a>
+
+
+      </html>
+    </panel>
+    <panel>
+      <html>
+        <h2>Building Blocks</h2>
+          <img src="/static/app/minecraft-behaviour-app/images/alex.png"  style="width:80px;height:200px;float:right;margin: 15px;"/>
+        <p style="margin-top:40px;margin-bottom:40px;">Welcome to the player stats dashboard. Here you can see all of the vital information about your favourite players. Using data we've brought into Splunk you'll be able to see who's the best and who needs to keep up with the rest... To begin, select a player from the dropdown above and let's see how they rank! Understand how the Minecraft world is being changed in their image as they play, interract and expand the world to survive</p>
+	<a class="btn btn-primary pull-right" style="margin:20px;" href="/app/minecraft-behaviour-app/object_tracking">Object Tracking</a>        <a class="btn btn-primary pull-right" style="margin:20px;" href="/app/minecraft-behaviour-app/building_activity_tracking">Build Activity</a>        <a class="btn default pull-right" style="margin:20px;">Structure Analysis</a>
+
+      </html>
+    </panel>
+  </row>
+    <row>
+    <panel>
+      <html>
+        <h1>Minecraft Cartography</h1>
+          <img src="/static/app/minecraft-behaviour-app/images/cartography.png" style="width:160px;height:160px;float:left;margin:15px;" />
+        <p style="margin-top:40px;margin-bottom:40px;">View a window into your Minecraft world. Plot events and data onto a leaflet.js representation of your Minecraft World to understand and track user travel and behaviour. Leverage the co-ordinate system to lookup interesting structures and locations within Minecraft easily and effectively.</p>
+                <a class="btn default pull-right" style="margin:20px;">Minecraft MAP (WIP)</a>      
+
+      </html>
+    </panel>
+  </row>
+  
+  <row>
+    <panel>
+      <html>
+        <h2>Mobs &amp; Robbers</h2>
+          <img src="/static/app/minecraft-behaviour-app/images/creeper.png" style="width:90px;height:180px;float:left;margin: 15px;"/>
+        <p style="margin-top:40px;margin-bottom:40px;">Identify Mobs and Kill behaviour within the minecraft world. Understand spawn patterns of Mobs and their frequency of detection within biomes based on player encounters. Understand common spawn locations and frequency easily</p>
+                <a class="btn btn-primary pull-right" style="margin:20px;" href="/app/minecraft-behaviour-app/mob_activity_tracking">Activity Tracking</a> <a class="btn btn-primary pull-right" style="margin:20px;" href="/Minecraft/kill_tracking">Kill Tracking</a>         <a class="btn default pull-right" style="margin:20px;">Mob Spawning (WIP)</a>        
+
+      </html>
+    </panel>
+    <panel>
+      <html>
+        <h2>Games &amp; Scenario's</h2>
+          <img src="/static/app/minecraft-behaviour-app/images/zombie.png" style="width:90px;height:180px;float:right;margin: 15px;"/>
+        <p style="margin-top:40px;margin-bottom:40px;">Scenario's built to help demonstrate capabilities of Splunk as a Data Analytics school as part of our 'Fields Good' approach. Utilise these dashboards along with scenario scripts to play interesting challenges and educate and inform your groups easily and effecitvely</p>
+                <a class="btn btn-primary pull-right" style="margin:20px;" href="/app/minecraft-behaviour-app/minecraft_hide_seek">Hide &amp; Seek Hunting</a>        <a class="btn default pull-right" style="margin:20px;">Hidden Treasure (WIP)</a>        <a class="btn default pull-right" style="margin:20px;">The Hords (WIP)</a>
+
+      </html>
+    </panel>
+  </row>
+</dashboard>

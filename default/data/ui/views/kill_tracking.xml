@@ -1,0 +1,116 @@
+<form theme="dark">
+  <label>Kill Tracking</label>
+  <description>Use this dashboard to see who is the most vicious killer...</description>
+  <fieldset submitButton="false"></fieldset>
+    <row >
+  <html depends="$magictoken$">
+<style>
+  .dashboard-body {
+  background-image: url('/static/app/minecraft-behaviour-app/images/bg.jpg') !important;
+  background-blend-mode: hard-light;
+  background-repeat: repeat;
+  background-size: 42% ;
+  }
+  
+
+</style>  
+</html>
+</row>
+  <row>
+    <panel>
+      <html>
+  <h2>Kill Tracking</h2>
+  <p>This dashboard is all about who kills whom and who's dishing out the damage.</p>
+</html>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Details by Player</title>
+      <input type="dropdown" token="player" searchWhenChanged="true">
+        <label>Player</label>
+        <fieldForLabel>event.player</fieldForLabel>
+        <fieldForValue>event.player</fieldForValue>
+        <search>
+          <query>index=minecraft sourcetype=minecraft:events event.player=* | dedup event.player | fields event.player</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+      </input>
+      <html>
+  <h2>
+    Text
+  </h2>
+  <p>
+    More text
+  </p>
+</html>
+    </panel>
+    <panel>
+      <title>Details by Human vs NPC</title>
+      <input type="dropdown" token="npc" searchWhenChanged="true">
+        <label>NPC or Human</label>
+        <choice value="NPC">NPC</choice>
+        <choice value="Human">Human</choice>
+      </input>
+      <html>
+  <h2>
+    Text
+  </h2>
+  <p>
+    More text
+  </p>
+</html>
+    </panel>
+  </row>
+  <row>
+    <panel depends="$player$">
+      <table>
+        <search>
+          <query>index=minecraft event.player=$player$ event.message=*killed*
+| rename event.target AS target event.weapon AS weapon
+| eval target=upper(target),weapon=upper(weapon)
+| stats count by target weapon 
+| sort - count
+| rename target AS "The victim..." weapon AS "The weapon of choice..."</query>
+          <earliest>-90d@d</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+    <panel depends="$npc$">
+      <table>
+        <search>
+          <query>index=minecraft "event.action"="deal damage"
+| regex event.message="killed"
+| rex field="event.message" "(?&lt;killer&gt;[a-zA-z0-9]+)\skilled\sthe\s(?&lt;killed&gt;[a-zA-z0-9]+)"
+| rename event.mob AS mob 
+| eval npc=if(isnull(mob),"Human","NPC")
+| search npc="$npc$" 
+| table _time killer killed
+| rename killer AS "The Nasty Killer..." killed AS "The Poor Victim..."</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>

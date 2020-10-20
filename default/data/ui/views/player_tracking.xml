@@ -1,0 +1,172 @@
+<form theme="dark">
+  <label>Player Tracking</label>
+  <fieldset submitButton="false"></fieldset>
+    <row >
+  <html depends="$magictoken$">
+<style>
+  .dashboard-body {
+  background-image: url('/static/app/minecraft-behaviour-app/images/bg.jpg') !important;
+  background-blend-mode: hard-light;
+  background-repeat: repeat;
+  background-size: 42% ;
+  }
+  
+
+</style>  
+</html>
+</row>
+  <row>
+    <panel>
+      <input type="dropdown" token="player">
+        <label>Player</label>
+        <fieldForLabel>event.player</fieldForLabel>
+        <fieldForValue>event.player</fieldForValue>
+        <search>
+          <query>index=minecraft sourcetype=minecraft:events event.player=* | dedup event.player | fields event.player</query>
+          <earliest>0</earliest>
+          <latest></latest>
+        </search>
+      </input>
+      <html>
+<h2>Track all the things!</h2>
+<p>This is where we can see where our players have been hanging out, where are they doing their work, where do they get into fights, and where do they die... simply select a player from the dropdown above and let's get investigating!</p>
+</html>
+    </panel>
+  </row>
+  <row>
+    <panel depends="$player$">
+      <title>Where has $player$ been hanging out the most?</title>
+      <chart>
+        <search>
+          <query>index=minecraft event.player=$player$ event.location.x=* event.location.y=* event.location.z=*
+| fields event.location.x event.location.z event.location.y _time
+| rename event.location.x AS x event.location.z AS z event.location.y AS y
+| eval x=round(x,2),z=round(z,2),y=round(y,2)
+| stats median(x) AS x_loc median(z) AS z_loc median(y) as y_loc by _time
+| rename x_loc AS "West to East" z_loc AS "South to North"</query>
+          <earliest>0</earliest>
+          <latest></latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">bubble</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+    <panel depends="$player$">
+      <title>Which Biome does $player$ spend most of their time in?</title>
+      <chart>
+        <search>
+          <query>index=minecraft event.player=$player$
+| fields event.location.biome 
+| rename event.location.biome AS biome 
+| chart count by biome
+| rex mode=sed field=biome "s/_/ /g" 
+| sort - count</query>
+          <earliest>-90d@d</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel depends="$player$">
+      <title>Coordinates Explanation</title>
+      <html>
+        <h2>
+          Coordinates in Minecraft
+        </h2>
+        <p>
+        </p>
+        <p>
+          The positive values listed for both furthest South and furthest North indicate that the player "Guitaraholic" remained in the Southern "Hempisphere".
+        </p>
+        <p>
+          Similarly, the negative values for both furthest East and Furthest West indicate that the player "Guitaraholic remained in the Western "Hemisphere".
+        </p>
+      </html>
+    </panel>
+  </row>
+  <row>
+    <panel depends="$player$">
+      <title>How far out has $player$ been exploring?</title>
+      <chart>
+        <search>
+          <query>index=minecraft event.player=$player$
+| chart min(event.location.z) AS "Furthest North reached" max(event.location.z) AS "Furthest South reached" min(event.location.x) AS "Furthest West reached" max(event.location.x) AS "Furthest East reached" min(event.location.y) AS "Lowest point reached" max(event.location.y) AS "Highest point reached" by event.player</query>
+          <earliest>-90d@d</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.axisTitleY.visibility">collapsed</option>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+</form>

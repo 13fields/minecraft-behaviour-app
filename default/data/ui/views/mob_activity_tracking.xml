@@ -1,0 +1,166 @@
+<form theme="dark">
+  <label>Mob Activity Tracking</label>
+  <fieldset submitButton="false"></fieldset>
+    <row >
+  <html depends="$magictoken$">
+<style>
+  .dashboard-body {
+  background-image: url('/static/app/minecraft-behaviour-app/images/bg.jpg') !important;
+  background-blend-mode: hard-light;
+  background-repeat: repeat;
+  background-size: 42% ;
+  }
+  
+
+</style>  
+</html>
+</row>
+  <row>
+    <panel>
+      <html>
+  <h2>
+    Text
+  </h2>
+  <p>
+    This dashboard is about the NPCs - what are they up to? Where are they most active? How do they interact with each other?
+  </p>
+</html>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Breakdown of mob types seen - What's out there in the world?</title>
+      <chart>
+        <search>
+          <query>index=minecraft event.mob=* | stats count by event.mob</query>
+          <earliest>-90d@d</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="height">348</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>The 10 busiest places for Mobs attacking Mobs</title>
+      <table>
+        <search>
+          <query>index=minecraft event.mob=* event.type=damage 
+| rename event.location.x AS X event.location.y AS Y 
+| eval X=round(X,1),Y=round(Y,1),combo=X.", ".Y
+| stats count by combo
+| sort - count
+| head 10
+| rename combo AS "Coordinates" count AS "Occurences"</query>
+          <earliest>-90d@d</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Mob Selector</title>
+      <input type="dropdown" token="mob" searchWhenChanged="true">
+        <label>Mob Type</label>
+        <fieldForLabel>mob</fieldForLabel>
+        <fieldForValue>mob</fieldForValue>
+        <search>
+          <query>index=minecraft event.mob=* | fields event.mob | rename event.mob AS mob
+| dedup mob</query>
+          <earliest>-90d@d</earliest>
+          <latest>now</latest>
+        </search>
+      </input>
+      <html>
+  <h2>Mob on Mob violence</h2>
+  <p>Pick a perpetrator to see how often and how frequently they attack other Mobs.</p>
+</html>
+    </panel>
+  </row>
+  <row>
+    <panel depends="$mob$">
+      <title>Breakdown of $mob$ Mob Activity by Message</title>
+      <chart>
+        <search>
+          <query>index=minecraft event.mob=$mob$
+| regex event.message="(?m)^(?!.*\bwell\b).+$"
+| stats count by event.message</query>
+          <earliest>-90d@d</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel depends="$mob$">
+      <title>$mob$ Mob Activity by Message Over Time</title>
+      <chart>
+        <search>
+          <query>index=minecraft event.mob=$mob$
+| regex event.message="(?m)^(?!.*\bwell\b).+$"
+| rename event.mob AS mob
+| timechart count by event.message</query>
+          <earliest>-90d@d</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel depends="$mob$">
+      <title>$mob$ Mob Activity by Biome</title>
+      <chart>
+        <search>
+          <query>index=minecraft event.mob=$mob$ | stats count by event.location.biome</query>
+          <earliest>-90d@d</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+</form>

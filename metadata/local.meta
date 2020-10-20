@@ -1,0 +1,69 @@
+[app/ui]
+version = 7.3.0
+modtime = 1564440849.563296000
+
+[app/launcher]
+version = 7.3.0
+modtime = 1564440849.564968000
+
+[indexes/minecraft]
+owner = admin
+version = 7.3.0
+modtime = 1564440868.735299000
+
+[props/minecraft%3Aevents/EXTRACT-entity]
+access = read : [ * ], write : [ admin ]
+owner = admin
+version = 7.3.0
+modtime = 1564442816.534370000
+
+[inputs/http%3A%2F%2Fminecraft]
+access = read : [ admin ], write : [ admin ]
+export = none
+owner = admin
+version = 7.3.1
+modtime = 1565258858.649627000
+
+[views/player_stats]
+owner = admin
+version = 8.0.6
+modtime = 1601413848.496304000
+
+[nav/default]
+version = 8.0.6
+modtime = 1601414370.889200000
+
+[views/player_tracking]
+owner = admin
+version = 8.0.6
+modtime = 1601413901.614900000
+
+[views/kill_tracking]
+owner = admin
+version = 8.0.6
+modtime = 1601065082.394741000
+
+[views/object_tracking]
+owner = admin
+version = 8.0.6
+modtime = 1601065101.736258000
+
+[views/mob_activity_tracking]
+owner = admin
+version = 8.0.6
+modtime = 1601065091.452514000
+
+[views/building_activity_tracking]
+owner = admin
+version = 8.0.6
+modtime = 1601065132.637291000
+
+[views/home]
+owner = admin
+version = 8.0.6
+modtime = 1601413253.559211000
+
+[views/world_map]
+owner = admin
+version = 8.0.6
+modtime = 1601412945.094964000

@@ -1,0 +1,393 @@
+<form theme="dark">
+  <label>Player Stats</label>
+  <description>See information about individual players</description>
+  <fieldset submitButton="true" autoRun="false">
+    <input type="time" token="time">
+      <label></label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <html depends="$magictoken$">
+<style>
+  .dashboard-body {
+  background-image: url('/static/app/minecraft-behaviour-app/images/bg.jpg') !important;
+  background-blend-mode: hard-light;
+  background-repeat: repeat;
+  background-size: 42% ;
+  }
+  
+
+</style>  
+</html>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <input type="dropdown" token="player" searchWhenChanged="true">
+        <label>Player:</label>
+        <fieldForLabel>event.player</fieldForLabel>
+        <fieldForValue>event.player</fieldForValue>
+        <search>
+          <query>index=minecraft sourcetype=minecraft:events event.player=* | dedup event.player | fields event.player</query>
+        <earliest>$time.earliest$</earliest>
+        <latest>$time.latest$</latest>
+        </search>
+      </input>
+      <html>
+        <h2>Player Stats Dashboard</h2>
+        <p>Welcome to the player stats dashboard. Here you can see all of the vital information about your favourite players. Using data we've brought into Splunk you'll be able to see who's the best and who needs to keep up with the rest... To begin, select a player from the dropdown above and let's see how they rank!</p>
+      </html>
+    </panel>
+  </row>
+  <row>
+    <panel depends="$player$">
+      <title>$player$ status...</title>
+      <single>
+        <search>
+          <query>index=minecraft event.player=$player$ 
+| stats latest(_time) as time
+| eval now=now(),delta=now-time,status=if(delta&gt;60,"Offline","Online")
+| fields status</query>
+        <earliest>$time.earliest$</earliest>
+        <latest>$time.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel depends="$player$">
+      <title>$player$ is normally online...</title>
+      <chart>
+        <search>
+          <query>index=minecraft event.player=$player$
+| chart count by date_hour
+| eval date_hour=if(date_hour&gt;11,(date_hour-12)."PM",date_hour."AM"),date_hour=if(date_hour=="0PM","12PM",date_hour),date_hour=if(date_hour=="0AM","Midnight",date_hour)
+| rename date_hour AS "Hour of the day" count AS "Seen"</query>
+        <earliest>$time.earliest$</earliest>
+        <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+    <panel depends="$player$">
+      <title>$player$ last joined the game...</title>
+      <single>
+        <search>
+          <query>index=minecraft sourcetype=minecraft:events event.player=$player$ "event.action"="disconnected from the world"
+| stats latest(_time) AS time
+| eval now=now(),delta=now-time,hours=round(delta/3600,0),minutes=round(delta/60,0)
+| eval message=case(minutes&lt;2,"Online now",hours=0,minutes." minutes ago",hours&gt;=1,hours." hours ago")
+| fields message</query>
+        <earliest>$time.earliest$</earliest>
+        <latest>$time.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel depends="$player$">
+      <title>How many times has $player$ died?</title>
+      <single>
+        <search>
+          <query>index=minecraft event.player=$player$ "event.action"="you died" | stats count</query>
+         <earliest>$time.earliest$</earliest>
+        <latest>$time.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel depends="$player$">
+      <title>How many times does $player$ die per day?</title>
+      <single>
+        <search>
+          <query>index=minecraft event.player=$player$ "event.action"="you died" 
+| bin _time span=1d 
+| stats count by _time 
+| stats avg(count) AS Average</query>
+        <earliest>$time.earliest$</earliest>
+        <latest>$time.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0.0</option>
+        <option name="rangeColors">["0x53a051","0x0877a6","0xf8be34","0xf1813f","0xdc4e41"]</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+    <panel depends="$player$">
+      <title>$player$ has brought down death upon his foes this many times...</title>
+      <single>
+        <search>
+          <query>index=minecraft event.player=$player$ event.message=*killed*
+| stats count</query>
+        <earliest>$time.earliest$</earliest>
+        <latest>$time.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel depends="$player$">
+      <title>The epicentre of death... where $player$ is most likely to die!</title>
+      <table>
+        <search>
+          <query>index=minecraft event.player=$player$ "event.health"="0.0" 
+| stats median(event.location.x) AS x median(event.location.y) AS y median(event.location.z) AS z 
+| eval x=round(x,2),y=round(y,2),z=round(z,2)
+| rename x AS "X Coordinate" y AS "Y Coordinate" z AS "Z Coordinate"</query>
+        <earliest>$time.earliest$</earliest>
+        <latest>$time.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+    <panel depends="$player$">
+      <title>How sneaky has $player$ been?</title>
+      <table>
+        <search>
+          <query>index=minecraft event.player=$player$
+| rename event.action AS event_action 
+| eval Behaviour=if(event_action="sneaking","Sneaky","Not Sneaky") 
+| stats count by Behaviour 
+| eventstats sum(count) as percentage 
+| eval percentage=round(count*100/percentage,2)
+| fields - count
+| rename percentage AS "Percentage of the time"</query>
+        <earliest>$time.earliest$</earliest>
+        <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel depends="$player$">
+      <title>The state of $player$'s health over time...</title>
+      <chart>
+        <search>
+          <query>index=minecraft event.player=$player$ | timechart span=5m avg(event.health) AS health</query>
+        <earliest>$time.earliest$</earliest>
+        <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+    <panel depends="$player$">
+      <title>The state of $player$'s hunger over time...</title>
+      <chart>
+        <search>
+          <query>index=minecraft event.type=status event.player=$player$ | timechart avg(event.hunger) AS Hunger span=5m</query>
+        <earliest>$time.earliest$</earliest>
+        <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel depends="$player$">
+      <title>Who does $player$ attack the most?</title>
+      <chart>
+        <search>
+          <query>index=minecraft event.player=$player$ | stats count by event.target</query>
+        <earliest>$time.earliest$</earliest>
+        <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.abbreviation">none</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.abbreviation">none</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.abbreviation">none</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.mode">standard</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="charting.lineWidth">2</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">medium</option>
+      </chart>
+    </panel>
+    <panel depends="$player$">
+      <title>Top causes of pain for $player$</title>
+      <chart>
+        <search>
+          <query>index=minecraft "event.action"="take damage" "event.player"=$player$ | stats count by event.cause</query>
+        <earliest>$time.earliest$</earliest>
+        <latest>$time.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel depends="$player$">
+      <title>Who kills $player$ the most?</title>
+      <chart>
+        <search>
+          <query>index=minecraft "event.action"="you died" "event.player"=$player$ | stats count by event.cause</query>
+        <earliest>$time.earliest$</earliest>
+        <latest>$time.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel depends="$player$">
+      <title>How did $player$ die?</title>
+      <table>
+        <search>
+          <query>index=minecraft event.player=$player$ "event.action"="you died"
+| rex field=event.message "by\s(?&lt;cause&gt;\w+)$$"
+| stats count by cause
+| rename cause AS "Cause of death"
+| sort - count
+| rename count as "Number of deaths"</query>
+        <earliest>$time.earliest$</earliest>
+        <latest>$time.latest$</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="count">20</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="percentagesRow">false</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="rowNumbers">false</option>
+        <option name="totalsRow">false</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+</form>
